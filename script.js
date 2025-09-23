@@ -17,10 +17,16 @@ class BuscaJobApp {
         this.carregarConfiguracao();
         this.displayStats();
         this.setupModal();
+        this.setupSavedFilters();
         
         // Event listeners
         document.getElementById('buscar-agora').addEventListener('click', () => this.buscarVagas());
         document.getElementById('salvar-config').addEventListener('click', () => this.salvarConfiguracao());
+        
+        // Saved filters event listeners
+        document.getElementById('salvar-filtro').addEventListener('click', () => this.salvarFiltro());
+        document.getElementById('carregar-filtro').addEventListener('click', () => this.carregarFiltro());
+        document.getElementById('excluir-filtro').addEventListener('click', () => this.excluirFiltro());
         
         // Enter key support
         document.addEventListener('keypress', (e) => {
@@ -700,6 +706,139 @@ class BuscaJobApp {
             warning: 'exclamation-triangle'
         };
         return icons[type] || 'info-circle';
+    }
+
+    // Saved Filters functionality
+    setupSavedFilters() {
+        this.loadSavedFilters();
+    }
+
+    salvarFiltro() {
+        const nomeInput = document.getElementById('nome-filtro');
+        const nome = nomeInput.value.trim();
+        
+        if (!nome) {
+            this.showNotification('Por favor, digite um nome para o filtro.', 'warning');
+            return;
+        }
+
+        const filtro = this.coletarDadosFormulario();
+        const filtrosSalvos = this.getSavedFilters();
+        
+        // Check if filter name already exists
+        if (filtrosSalvos[nome]) {
+            if (!confirm(`Já existe um filtro com o nome "${nome}". Deseja substituí-lo?`)) {
+                return;
+            }
+        }
+
+        filtrosSalvos[nome] = {
+            ...filtro,
+            dataCriacao: new Date().toISOString(),
+            dataUltimoUso: new Date().toISOString()
+        };
+
+        localStorage.setItem('buscajob_filtros_salvos', JSON.stringify(filtrosSalvos));
+        this.loadSavedFilters();
+        nomeInput.value = '';
+        
+        this.showNotification(`Filtro "${nome}" salvo com sucesso!`, 'success');
+    }
+
+    carregarFiltro() {
+        const select = document.getElementById('filtros-salvos');
+        const nomeFilter = select.value;
+        
+        if (!nomeFilter) {
+            this.showNotification('Selecione um filtro para carregar.', 'warning');
+            return;
+        }
+
+        const filtrosSalvos = this.getSavedFilters();
+        const filtro = filtrosSalvos[nomeFilter];
+        
+        if (!filtro) {
+            this.showNotification('Filtro não encontrado.', 'error');
+            return;
+        }
+
+        // Update last use date
+        filtro.dataUltimoUso = new Date().toISOString();
+        filtrosSalvos[nomeFilter] = filtro;
+        localStorage.setItem('buscajob_filtros_salvos', JSON.stringify(filtrosSalvos));
+
+        // Load filter data into form
+        this.preencherFormulario(filtro);
+        
+        this.showNotification(`Filtro "${nomeFilter}" carregado com sucesso!`, 'success');
+    }
+
+    excluirFiltro() {
+        const select = document.getElementById('filtros-salvos');
+        const nomeFilter = select.value;
+        
+        if (!nomeFilter) {
+            this.showNotification('Selecione um filtro para excluir.', 'warning');
+            return;
+        }
+
+        if (!confirm(`Tem certeza que deseja excluir o filtro "${nomeFilter}"?`)) {
+            return;
+        }
+
+        const filtrosSalvos = this.getSavedFilters();
+        delete filtrosSalvos[nomeFilter];
+        
+        localStorage.setItem('buscajob_filtros_salvos', JSON.stringify(filtrosSalvos));
+        this.loadSavedFilters();
+        
+        this.showNotification(`Filtro "${nomeFilter}" excluído com sucesso!`, 'success');
+    }
+
+    getSavedFilters() {
+        const saved = localStorage.getItem('buscajob_filtros_salvos');
+        return saved ? JSON.parse(saved) : {};
+    }
+
+    loadSavedFilters() {
+        const select = document.getElementById('filtros-salvos');
+        const filtrosSalvos = this.getSavedFilters();
+        
+        // Clear existing options except the first one
+        select.innerHTML = '<option value="">Selecione um filtro salvo...</option>';
+        
+        // Add saved filters to select
+        Object.keys(filtrosSalvos).forEach(nome => {
+            const option = document.createElement('option');
+            option.value = nome;
+            option.textContent = nome;
+            select.appendChild(option);
+        });
+    }
+
+    preencherFormulario(filtro) {
+        // Fill text inputs
+        document.getElementById('cargo').value = filtro.cargo || '';
+        document.getElementById('localizacao').value = filtro.localizacao || '';
+        document.getElementById('salario-min').value = filtro.salarioMin || '';
+        document.getElementById('salario-max').value = filtro.salarioMax || '';
+        document.getElementById('palavras-chave').value = filtro.palavrasChave || '';
+        
+        // Fill select fields
+        document.getElementById('nivel').value = filtro.nivel || '';
+        document.getElementById('frequencia').value = filtro.frequencia || '';
+        
+        // Fill checkboxes for contract types
+        const tipoCheckboxes = document.querySelectorAll('input[name="tipo-contratacao"]');
+        tipoCheckboxes.forEach(checkbox => {
+            checkbox.checked = filtro.tipoContratacao && filtro.tipoContratacao.includes(checkbox.value);
+        });
+        
+        // Fill checkboxes for sites
+        const siteCheckboxes = document.querySelectorAll('input[name="sites"]');
+        siteCheckboxes.forEach(checkbox => {
+            checkbox.checked = filtro.sites && filtro.sites.includes(checkbox.value);
+        });
     }
 }
 

@@ -129,37 +129,37 @@
                                 Vagas.com
                             </label>
                             <label class="checkbox-label">
-                                <input type="checkbox" name="sites" value="glassdoor">
+                                <input type="checkbox" name="sites" value="glassdoor" checked>
                                 <span class="checkmark"></span>
                                 Glassdoor
                             </label>
                             <label class="checkbox-label">
-                                <input type="checkbox" name="sites" value="infojobs">
+                                <input type="checkbox" name="sites" value="infojobs" checked>
                                 <span class="checkmark"></span>
                                 InfoJobs
                             </label>
                             <label class="checkbox-label">
-                                <input type="checkbox" name="sites" value="stackoverflow">
+                                <input type="checkbox" name="sites" value="stackoverflow" checked>
                                 <span class="checkmark"></span>
                                 Stack Overflow Jobs
                             </label>
                             <label class="checkbox-label">
-                                <input type="checkbox" name="sites" value="github">
+                                <input type="checkbox" name="sites" value="github" checked>
                                 <span class="checkmark"></span>
                                 GitHub Jobs
                             </label>
                             <label class="checkbox-label">
-                                <input type="checkbox" name="sites" value="trampos">
+                                <input type="checkbox" name="sites" value="trampos" checked>
                                 <span class="checkmark"></span>
                                 Trampos.co
                             </label>
                             <label class="checkbox-label">
-                                <input type="checkbox" name="sites" value="rocket">
+                                <input type="checkbox" name="sites" value="rocket" checked>
                                 <span class="checkmark"></span>
                                 Rocket Jobs
                             </label>
                             <label class="checkbox-label">
-                                <input type="checkbox" name="sites" value="startup">
+                                <input type="checkbox" name="sites" value="startup" checked>
                                 <span class="checkmark"></span>
                                 Startup Jobs
                             </label>
@@ -176,6 +176,31 @@
                             <option value="semanal">Semanal</option>
                             <option value="quinzenal">Quinzenal</option>
                         </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="filtros-salvos">
+                            <i class="fas fa-bookmark"></i> Filtros Salvos:
+                        </label>
+                        <div class="saved-filters-container">
+                            <select id="filtros-salvos" name="filtros-salvos">
+                                <option value="">Selecione um filtro salvo...</option>
+                            </select>
+                            <div class="filter-actions">
+                                <button type="button" id="carregar-filtro" class="btn btn-small">
+                                    <i class="fas fa-upload"></i> Carregar
+                                </button>
+                                <button type="button" id="excluir-filtro" class="btn btn-small btn-danger">
+                                    <i class="fas fa-trash"></i> Excluir
+                                </button>
+                            </div>
+                        </div>
+                        <div class="save-filter-container">
+                            <input type="text" id="nome-filtro" placeholder="Nome do filtro (ex: Desenvolvedor SP)">
+                            <button type="button" id="salvar-filtro" class="btn btn-small btn-success">
+                                <i class="fas fa-bookmark"></i> Salvar Filtro
+                            </button>
+                        </div>
                     </div>
 
                     <div class="button-group">

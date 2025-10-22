@@ -15,6 +15,37 @@ from job_scraper import JobScraper
 import threading
 import schedule
 import time
+import smtplib
+from email.message import EmailMessage
+
+# Utilitário: enviar e-mail com anexo
+def send_email_with_attachment(subject: str, body: str, file_path: str):
+    smtp_host = os.environ.get("SMTP_HOST")
+    smtp_port = int(os.environ.get("SMTP_PORT", "587"))
+    smtp_user = os.environ.get("SMTP_USER")
+    smtp_pass = os.environ.get("SMTP_PASS")
+    email_from = os.environ.get("EMAIL_FROM")
+    email_to = os.environ.get("EMAIL_TO")
+
+    if not all([smtp_host, smtp_user, smtp_pass, email_from, email_to]):
+        raise RuntimeError(
+            "Configuração de email incompleta (SMTP_HOST/SMTP_USER/SMTP_PASS/EMAIL_FROM/EMAIL_TO)"
+        )
+
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = email_from
+    msg["To"] = email_to
+    msg.set_content(body)
+
+    with open(file_path, "rb") as f:
+        data = f.read()
+    msg.add_attachment(data, maintype="application", subtype="json", filename=os.path.basename(file_path))
+
+    with smtplib.SMTP(smtp_host, smtp_port) as s:
+        s.starttls()
+        s.login(smtp_user, smtp_pass)
+        s.send_message(msg)
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO)
@@ -35,15 +66,62 @@ estatisticas = {
     'vagas_salvas': 0
 }
 
-@app.route('/')
-def index():
-    """Serve a página principal"""
-    return send_from_directory('.', 'index.html')
+# Removido: rotas de frontend que serviam arquivos estáticos
+# @app.route('/')
+# def index():
+#     """Serve a página principal"""
+#     return send_from_directory('.', 'index.html')
 
-@app.route('/<path:filename>')
-def serve_static(filename):
-    """Serve arquivos estáticos"""
-    return send_from_directory('.', filename)
+# @app.route('/<path:filename>')
+# def serve_static(filename):
+#     """Serve arquivos estáticos"""
+#     return send_from_directory('.', filename)
+
+# Nova rota raiz apenas informativa, sem frontend
+@app.route('/')
+def root():
+    """Rota raiz informativa para ambiente somente API"""
+    return jsonify({
+        'success': True,
+        'message': 'BuscaJob API ativa (sem frontend HTML)',
+        'endpoints': [
+            '/api/relatorio-fixo',
+            '/api/ultimo-resultado',
+            '/api/buscar-vagas',
+            '/api/health'
+        ]
+    })
+@app.route('/api/ultimo-resultado', methods=['GET'])
+def ultimo_resultado():
+    """Retorna o último arquivo de resultados salvo"""
+    try:
+        base_dir = os.path.abspath('.')
+        files = [f for f in os.listdir(base_dir) if f.startswith('resultados_') and f.endswith('.json')]
+        if not files:
+            return jsonify({'success': False, 'error': 'Nenhum arquivo de resultados encontrado'}), 404
+        latest_file = max(files, key=lambda f: os.path.getmtime(os.path.join(base_dir, f)))
+        with open(os.path.join(base_dir, latest_file), 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        vagas = data.get('vagas', [])
+        normalized = []
+        for idx, v in enumerate(vagas):
+            normalized.append({
+                'id': v.get('id') or f"vaga_{idx}_{int(time.time())}",
+                'titulo': v.get('titulo', ''),
+                'empresa': v.get('empresa', ''),
+                'localizacao': v.get('localizacao', ''),
+                'salario': v.get('salario', ''),
+                'descricao': v.get('descricao', ''),
+                'dataPublicacao': v.get('dataPublicacao', ''),
+                'site': v.get('site') or v.get('site_origem', ''),
+                'url': v.get('url', ''),
+                'tipo': v.get('tipo') or v.get('tipo_contrato', ''),
+                'nivel': v.get('nivel') or v.get('nivel_experiencia', ''),
+            })
+        return jsonify({'success': True, 'vagas': normalized, 'total': len(normalized), 'arquivo': latest_file})
+    except Exception as e:
+        logger.exception(f'Erro ao carregar último resultado: {e}')
+        return jsonify({'success': False, 'error': 'Erro ao carregar arquivo'}), 500
 
 @app.route('/api/buscar-vagas', methods=['POST'])
 def buscar_vagas():
@@ -267,6 +345,154 @@ def exportar_vagas():
         logger.error(f"Erro ao exportar vagas: {e}")
         return jsonify({'error': f'Erro interno: {str(e)}'}), 500
 
+# Limpeza de arquivos antigos (Dia-1 e anteriores)
+
+def cleanup_old_result_files():
+    base_dir = os.path.abspath('.')
+    today_str = datetime.now().strftime('%Y%m%d')
+    patterns = ('resultados_', 'relatorio_fixo_')
+    removed = []
+    for name in os.listdir(base_dir):
+        if any(name.startswith(p) and name.endswith('.json') for p in patterns):
+            full_path = os.path.join(base_dir, name)
+            # Tenta extrair YYYYMMDD do nome (resultados_YYYYMMDD_HHMMSS.json)
+            try:
+                parts = name.split('_')
+                if len(parts) >= 2 and parts[1][:8].isdigit():
+                    file_date = parts[1][:8]
+                    if file_date != today_str:
+                        os.remove(full_path)
+                        removed.append(name)
+                        continue
+            except Exception:
+                pass
+            # Fallback por mtime: remove >24h
+            try:
+                mtime = os.path.getmtime(full_path)
+                if time.time() - mtime > 24 * 3600:
+                    os.remove(full_path)
+                    removed.append(name)
+            except Exception:
+                pass
+    if removed:
+        logger.info(f"Arquivos antigos removidos: {removed}")
+
+@app.route('/api/relatorio-fixo', methods=['GET'])
+def relatorio_fixo():
+    try:
+        cleanup_old_result_files()
+        cargos = [
+            'Analista de Sistemas',
+            'Analista de Negocios',
+            'Analista de Requisitos',
+            'Desenvolvedor',
+        ]
+        cidades = [
+            'Joinville',
+            'São Paulo',
+            'Curitiba',
+            'Porto Alegre',
+            'Belo Horizonte',
+        ]
+        # Obtém lista de sites do scraper, com fallback
+        try:
+            sites = list(getattr(scraper, 'scrapers', {}).keys())
+            if not sites:
+                sites = [
+                    'linkedin','indeed','catho','infojobs','trampos','gupy','kenoby','empregos','glassdoor','stackoverflow','vagas'
+                ]
+        except Exception:
+            sites = [
+                'linkedin','indeed','catho','infojobs','trampos','gupy','kenoby','empregos','glassdoor','stackoverflow','vagas'
+            ]
+
+        all_vagas = []
+        total_consultas = 0
+
+        for cargo in cargos:
+            for cidade in cidades:
+                criterios = {
+                    'cargo': cargo,
+                    'localizacao': cidade,
+                    'sites': sites,
+                    'tipos_contratacao': ['CLT', 'PJ']
+                }
+                resultados = scraper.buscar_vagas(criterios)
+                total_consultas += 1
+                for v in resultados:
+                    vaga_dict = {
+                        'id': f"vaga_{hash(getattr(v, 'titulo', '') + getattr(v, 'empresa', ''))}",
+                        'titulo': getattr(v, 'titulo', ''),
+                        'empresa': getattr(v, 'empresa', ''),
+                        'localizacao': getattr(v, 'localizacao', cidade),
+                        'salario': getattr(v, 'salario', ''),
+                        'descricao': getattr(v, 'descricao', ''),
+                        'dataPublicacao': getattr(v, 'data_publicacao', ''),
+                        'site': getattr(v, 'site_origem', ''),
+                        'url': getattr(v, 'url', ''),
+                        'tipo': getattr(v, 'tipo_contrato', ''),
+                        'nivel': getattr(v, 'nivel_experiencia', '')
+                    }
+                    all_vagas.append(vaga_dict)
+
+        # Deduplicação básica por (titulo, empresa, site, url)
+        seen = set()
+        dedup = []
+        for v in all_vagas:
+            key = (v.get('titulo'), v.get('empresa'), v.get('site'), v.get('url'))
+            if key in seen:
+                continue
+            seen.add(key)
+            dedup.append(v)
+
+        # Salvar arquivo JSON
+        filename = f"relatorio_fixo_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        payload = {
+            'timestamp': datetime.now().isoformat(),
+            'cargos': cargos,
+            'cidades': cidades,
+            'sites': sites,
+            'total_consultas': total_consultas,
+            'total_vagas': len(dedup),
+            'vagas': dedup,
+        }
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+
+        # Enviar e-mail opcionalmente
+        email_sent = False
+        email_error = None
+        if os.environ.get('EMAIL_ENABLED', '').lower() in ('1', 'true', 'yes'):
+            try:
+                send_email_with_attachment(
+                    subject=f"BuscaJob Relatório Fixo - {datetime.now().strftime('%Y-%m-%d')}",
+                    body=(
+                        f"Relatório gerado em {payload['timestamp']}\n"
+                        f"Cargos: {', '.join(cargos)}\n"
+                        f"Cidades: {', '.join(cidades)}\n"
+                        f"Total de vagas: {len(dedup)}\n"
+                    ),
+                    file_path=filename,
+                )
+                email_sent = True
+            except Exception as e:
+                email_error = str(e)
+                logger.error(f"Falha ao enviar e-mail: {email_error}")
+
+        resp = {
+            'success': True,
+            'arquivo': filename,
+            'total': len(dedup),
+            'email_enviado': email_sent,
+            'email_erro': email_error,
+            'vagas': dedup,
+        }
+        return jsonify(resp)
+
+    except Exception as e:
+        logger.exception("Erro ao gerar relatório fixo")
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
 def salvar_resultados_arquivo(vagas, criterios):
     """Salva resultados em arquivo JSON"""
     try:
@@ -337,6 +563,11 @@ schedule.every().day.at("18:00").do(busca_agendada)
 # Inicia thread do agendador
 agendador_thread = threading.Thread(target=executar_agendador, daemon=True)
 agendador_thread.start()
+
+# Nova rota de saúde para monitoramento simples
+@app.route('/api/health', methods=['GET'])
+def health():
+    return jsonify({'status': 'ok', 'time': datetime.now().isoformat()})
 
 if __name__ == '__main__':
     print("🚀 Iniciando BuscaJob API Server...")

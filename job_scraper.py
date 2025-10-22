@@ -343,6 +343,20 @@ class JobScraper:
                 texto_vaga = f"{vaga.titulo} {vaga.descricao}".lower()
                 if not any(palavra in texto_vaga for palavra in palavras):
                     continue
+
+            # Filtro por localização
+            if criterios.get('localizacao'):
+                loc = criterios['localizacao'].strip().lower()
+                texto_loc_vaga = (vaga.localizacao or '').lower()
+                if loc == 'remoto':
+                    if 'remoto' not in texto_loc_vaga:
+                        continue
+                else:
+                    # Suporta múltiplas localidades separadas por vírgula, barra, ponto e vírgula ou pipe
+                    tokens = [t.strip() for t in re.split(r'[;,/\\|]', loc) if t.strip()]
+                    match = any(token in texto_loc_vaga for token in tokens)
+                    if not match:
+                        continue
             
             # Filtro por range salarial
             if criterios.get('salario_minimo') or criterios.get('salario_maximo'):

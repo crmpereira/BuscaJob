@@ -53,6 +53,12 @@ Thumbs.db
 # Project specific
 resultados_*.json
 *.pyc
+relatorio_fixo_*.json
+vagas_buscajob_*.json
+vagas_buscajob_*.xlsx
+estatisticas.json
+vagas_salvas.json
+configuracoes.json
 
 # Flask
 instance/

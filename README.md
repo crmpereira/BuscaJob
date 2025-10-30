@@ -1,6 +1,6 @@
 # BuscaJob – Modo Somente API
 
-API Flask para coleta e consolidação de vagas de emprego (sem frontend). Inclui endpoints para relatório fixo, busca por critérios, último resultado e health check. Oferece automação via PowerShell e um CLI opcional.
+API Flask para coleta e consolidação de vagas de emprego (sem frontend). Inclui endpoints para relatório fixo, busca por critérios, último resultado e health check. Oferece automação via PowerShell.
 
 ## Quickstart (GitHub)
 - Clonar: `git clone https://github.com/crmpereira/BuscaJob.git`
@@ -22,15 +22,6 @@ API Flask para coleta e consolidação de vagas de emprego (sem frontend). Inclu
 - Com email: `powershell -ExecutionPolicy Bypass -File .\run_relatorio.ps1 -EnviarEmail`
 - Observação: usa Flask test client, imprime `Arquivo` e `Total de vagas`.
 
-## CLI (opcional)
-- Arquivo: `cli_buscajob.py`
-- Base URL: `BUSCAJOB_URL` (default `http://localhost:5000`)
-- Último resultado:
-  - `python cli_buscajob.py --ultimo`
-  - JSON bruto: `python cli_buscajob.py --ultimo --json`
-- Busca por critérios:
-  - `python cli_buscajob.py --cargo "Desenvolvedor" --localizacao "Joinville" --sites linkedin,indeed --tipos CLT --abrir primeiro`
-
 ## Requisitos e variáveis
 - Python 3.10+
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`, `EMAIL_TO` (opcional)
@@ -41,5 +32,5 @@ API Flask para coleta e consolidação de vagas de emprego (sem frontend). Inclu
 - `/api/buscar-vagas` -> `resultados_YYYYMMDD_HHMMSS.json`
 
 ## Organização do repo
-- Frontend removido; `.gitignore` ignora arquivos gerados (`relatorio_fixo_*`, `resultados_*`, `vagas_buscajob_*`, `estatisticas.json`, `vagas_salvas.json`, `configuracoes.json`).
+- Frontend removido; CLI removido; `.gitignore` ignora arquivos gerados (`relatorio_fixo_*`, `resultados_*`, `vagas_buscajob_*`, `estatisticas.json`, `vagas_salvas.json`, `configuracoes.json`).
 - Dependências enxutas em `requirements.txt` (removido `selenium` e `python-dotenv`).

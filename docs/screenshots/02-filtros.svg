@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720">
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <rect x="40" y="40" width="1120" height="60" rx="12" fill="#6366F1"/>
+  <text x="60" y="80" font-family="Segoe UI, Roboto, Arial" font-size="28" fill="#ffffff">BuscaJob — Filtros</text>
+
+  <!-- Card de filtros -->
+  <rect x="40" y="120" width="1120" height="520" rx="12" fill="#ffffff" stroke="#E5E7EB"/>
+
+  <!-- Grupo Cargo -->
+  <text x="60" y="160" font-family="Segoe UI, Roboto, Arial" font-size="20" fill="#111827">Cargo</text>
+  <rect x="60" y="180" width="1080" height="80" rx="8" fill="#F9FAFB" stroke="#E5E7EB"/>
+  <text x="80" y="210" font-family="Segoe UI, Roboto, Arial" font-size="16" fill="#111827">☑ Todos • ☐ Backend • ☐ Frontend • ☐ QA • ☐ DevOps</text>
+
+  <!-- Grupo Localização -->
+  <text x="60" y="290" font-family="Segoe UI, Roboto, Arial" font-size="20" fill="#111827">Localização</text>
+  <rect x="60" y="310" width="1080" height="80" rx="8" fill="#F9FAFB" stroke="#E5E7EB"/>
+  <text x="80" y="340" font-family="Segoe UI, Roboto, Arial" font-size="16" fill="#111827">☑ Todos • ☐ São Paulo • ☐ Belo Horizonte • ☐ Remoto • ☐ Híbrido</text>
+
+  <!-- Grupo Sites -->
+  <text x="60" y="420" font-family="Segoe UI, Roboto, Arial" font-size="20" fill="#111827">Sites</text>
+  <rect x="60" y="440" width="1080" height="160" rx="8" fill="#F9FAFB" stroke="#E5E7EB"/>
+  <text x="80" y="470" font-family="Segoe UI, Roboto, Arial" font-size="16" fill="#111827">☑ Todos • ☐ linkedin • ☐ indeed • ☐ catho • ☐ infojobs • ☐ vagas • ...</text>
+  <text x="80" y="500" font-family="Segoe UI, Roboto, Arial" font-size="14" fill="#6B7280">Lista com rolagem e tipografia reduzida</text>
+
+  <!-- Botão Buscar -->
+  <rect x="1000" y="600" width="120" height="40" rx="8" fill="#6366F1"/>
+  <text x="1015" y="625" font-family="Segoe UI, Roboto, Arial" font-size="16" fill="#ffffff">🔎 Buscar</text>
+
+  <text x="40" y="690" font-family="Segoe UI, Roboto, Arial" font-size="14" fill="#6B7280">Imagem ilustrativa gerada automaticamente</text>
+</svg>

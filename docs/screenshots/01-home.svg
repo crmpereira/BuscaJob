@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720">
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <rect x="40" y="40" width="1120" height="100" rx="12" fill="#6366F1"/>
+  <text x="60" y="100" font-family="Segoe UI, Roboto, Arial" font-size="42" fill="#ffffff">BuscaJob — Home</text>
+  <text x="60" y="140" font-family="Segoe UI, Roboto, Arial" font-size="18" fill="#EDEDFE">Busca simples e lista de vagas via API</text>
+
+  <rect x="40" y="170" width="1120" height="160" rx="12" fill="#ffffff" stroke="#E5E7EB"/>
+  <text x="60" y="200" font-family="Segoe UI, Roboto, Arial" font-size="20" fill="#111827">Filtros</text>
+  <text x="60" y="230" font-family="Segoe UI, Roboto, Arial" font-size="16" fill="#374151">Cargo, Localização e Sites com opção "Todos"</text>
+
+  <rect x="40" y="350" width="1120" height="260" rx="12" fill="#ffffff" stroke="#E5E7EB"/>
+  <text x="60" y="380" font-family="Segoe UI, Roboto, Arial" font-size="20" fill="#111827">Lista de Vagas</text>
+  <text x="60" y="410" font-family="Segoe UI, Roboto, Arial" font-size="16" fill="#374151">Título • Empresa • Localização • Salário • Publicação • Nível</text>
+  <rect x="60" y="440" width="1080" height="60" rx="8" fill="#F9FAFB" stroke="#E5E7EB"/>
+  <text x="80" y="480" font-family="Segoe UI, Roboto, Arial" font-size="16" fill="#111827">🔗 Abrir Vaga</text>
+
+  <text x="40" y="690" font-family="Segoe UI, Roboto, Arial" font-size="14" fill="#6B7280">Imagem ilustrativa gerada automaticamente</text>
+</svg>

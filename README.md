@@ -55,6 +55,14 @@ Aplicação para buscar e listar vagas com um backend em Python e um frontend em
 - Botão **Buscar** alinhado à direita.
 - Botão **Abrir Vaga** agora utiliza link direto quando a URL é válida e normaliza casos sem protocolo (ex.: `www.exemplo.com`, `http//exemplo.com`).
 
+## Imagens em funcionamento
+
+![Home](docs/screenshots/01-home.svg)
+
+![Filtros](docs/screenshots/02-filtros.svg)
+
+![Abrir Vaga](docs/screenshots/03-abrir-vaga.svg)
+
 ## Testes manuais de "Abrir Vaga"
 - Vaga com URL válida (`https://exemplo.com/vaga`): abre em nova aba.
 - Vaga com URL sem protocolo (`www.exemplo.com/vaga`): normaliza para `https://` e abre.

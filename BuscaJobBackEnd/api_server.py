@@ -91,6 +91,7 @@ def root():
             '/api/relatorio-fixo',
             '/api/ultimo-resultado',
             '/api/buscar-vagas',
+            '/api/sites',
             '/api/health'
         ]
     })
@@ -130,6 +131,12 @@ def ultimo_resultado():
 def buscar_vagas():
     """Endpoint para buscar vagas"""
     try:
+        # Remove arquivos de resultados antigos antes de iniciar uma nova busca
+        try:
+            cleanup_old_result_files()
+        except Exception as _cleanup_err:
+            logger.warning(f"Falha ao limpar arquivos antigos antes da busca: {_cleanup_err}")
+
         criterios = request.get_json()
         
         if not criterios:
@@ -498,6 +505,20 @@ def relatorio_fixo():
     except Exception as e:
         logger.exception("Erro ao gerar relatório fixo")
         return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
+@app.route('/api/sites', methods=['GET'])
+def listar_sites():
+    """Lista os sites suportados pelo scraper."""
+    try:
+        sites = list(getattr(scraper, 'scrapers', {}).keys())
+        if not sites:
+            sites = [
+                'linkedin','indeed','catho','infojobs','trampos','gupy','kenoby','empregos','glassdoor','stackoverflow','vagas'
+            ]
+        return jsonify({'sites': sites, 'total': len(sites)})
+    except Exception:
+        logger.exception("Erro ao listar sites")
+        return jsonify({'error': 'Falha ao listar sites'}), 500
 
 def salvar_resultados_arquivo(vagas, criterios):
     """Salva resultados em arquivo JSON"""

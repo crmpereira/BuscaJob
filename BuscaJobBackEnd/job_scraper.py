@@ -79,6 +79,42 @@ class JobScraper:
             'rocket': self._scrape_rocket,
             'startup': self._scrape_startup
         }
+
+    def _gerar_descricao(self, cargo: str, empresa: str) -> str:
+        """Gera uma descrição variada e curta para a vaga (mock)."""
+        responsaveis = [
+            f"Atuar como {cargo} em times ágeis",
+            "Colaborar com produto e UX",
+            "Desenvolver features escaláveis",
+            "Escrever código limpo e testável",
+            "Participar de code reviews",
+        ]
+        requisitos = [
+            "Experiência com tecnologias modernas",
+            "Conhecimento em APIs REST/GraphQL",
+            "Boas práticas de versionamento (Git)",
+            "Atenção a performance e segurança",
+            "Boa comunicação e proatividade",
+        ]
+        beneficios = [
+            "Plano de saúde",
+            "Horário flexível",
+            "Remoto híbrido",
+            "Auxílio educação",
+            "Day off no aniversário",
+        ]
+        # Escolhas aleatórias para variar a mensagem
+        r1 = random.choice(responsaveis)
+        r2 = random.choice(responsaveis)
+        req = random.choice(requisitos)
+        ben = random.choice(beneficios)
+        # Evita duplicar exatamente a mesma frase
+        if r2 == r1:
+            r2 = random.choice([r for r in responsaveis if r != r1])
+        return (
+            f"Oportunidade como {cargo} na {empresa}. "
+            f"{r1}. {r2}. {req}. Benefícios: {ben}."
+        )
         
     def buscar_vagas(self, criterios: Dict) -> List[Vaga]:
         """
@@ -141,7 +177,7 @@ class JobScraper:
                     empresa=empresa,
                     localizacao=localizacoes_mock[i % len(localizacoes_mock)],
                     salario=f"R$ {random.randint(3000, 12000):,}".replace(',', '.'),
-                    descricao=f"Oportunidade para {cargo} em empresa inovadora. Requisitos: experiência com tecnologias modernas.",
+                    descricao=self._gerar_descricao(cargo, empresa),
                     data_publicacao=(datetime.now() - timedelta(days=random.randint(0, 7))).strftime('%d/%m/%Y'),
                     site_origem='Indeed',
                     url=f'https://br.indeed.com/viewjob?jk={random.randint(1000000000000000, 9999999999999999)}&tk={random.randint(100000000000000000000000000000000, 999999999999999999999999999999999)}',
@@ -232,7 +268,7 @@ class JobScraper:
                     empresa=empresa,
                     localizacao=localizacoes_mock[i % len(localizacoes_mock)],
                     salario=f"R$ {random.randint(3000, 12000):,}".replace(',', '.'),
-                    descricao=f"Oportunidade para {cargo} em empresa inovadora. Requisitos: experiência com tecnologias modernas.",
+                    descricao=self._gerar_descricao(cargo, empresa),
                     data_publicacao=(datetime.now() - timedelta(days=random.randint(0, 7))).strftime('%d/%m/%Y'),
                     site_origem='Catho',
                     url=f'https://www.catho.com.br/vagas/{cargo.lower().replace(" ", "-")}-{empresa.lower()}-{random.randint(1000000, 9999999)}/',
@@ -454,6 +490,7 @@ class JobScraper:
         try:
             # Simulação de dados do Glassdoor
             cargo = criterios.get('cargo', 'Desenvolvedor')
+            local_pref = (criterios.get('localizacao') or '').strip()
             
             # Lista de cidades brasileiras para variedade
             cidades = [
@@ -467,28 +504,30 @@ class JobScraper:
                 {
                     'titulo': f'{cargo} Sênior',
                     'empresa': 'Tech Company Brasil',
-                    'localizacao': cidades[random.randint(0, len(cidades)-1)],
+                    'localizacao': (local_pref or cidades[random.randint(0, len(cidades)-1)]),
                     'salario': 'R$ 8.000 - R$ 12.000',
-                    'descricao': f'Vaga para {cargo} com experiência em tecnologias modernas.',
+                    'descricao': None,
                     'url': f'https://www.glassdoor.com.br/Vaga/{cargo.lower().replace(" ", "-")}-senior-tech-company-brasil-JV_IC2643_KO0,{len(cargo)+7}_KE{len(cargo)+8},{len(cargo)+25}.htm?jl={random.randint(1000000, 9999999)}'
                 },
                 {
                     'titulo': f'{cargo} Pleno',
                     'empresa': 'Startup Inovadora',
-                    'localizacao': cidades[random.randint(0, len(cidades)-1)],
+                    'localizacao': (local_pref or cidades[random.randint(0, len(cidades)-1)]),
                     'salario': 'R$ 6.000 - R$ 9.000',
-                    'descricao': f'Oportunidade para {cargo} em ambiente ágil.',
+                    'descricao': None,
                     'url': f'https://www.glassdoor.com.br/Vaga/{cargo.lower().replace(" ", "-")}-pleno-startup-inovadora-JV_IC2643_KO0,{len(cargo)+6}_KE{len(cargo)+7},{len(cargo)+23}.htm?jl={random.randint(1000000, 9999999)}'
                 }
             ]
             
             for vaga_data in vagas_simuladas:
+                # Descrição variada baseada no cargo e empresa
+                desc = vaga_data['descricao'] or self._gerar_descricao(cargo, vaga_data['empresa'])
                 vaga = Vaga(
                     titulo=vaga_data['titulo'],
                     empresa=vaga_data['empresa'],
                     localizacao=vaga_data['localizacao'],
                     salario=vaga_data['salario'],
-                    descricao=vaga_data['descricao'],
+                    descricao=desc,
                     data_publicacao=(datetime.now() - timedelta(days=random.randint(1, 7))).strftime('%Y-%m-%d'),
                     site_origem='Glassdoor',
                     url=vaga_data['url'],

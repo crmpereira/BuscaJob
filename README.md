@@ -57,11 +57,11 @@ Aplicação para buscar e listar vagas com um backend em Python e um frontend em
 
 ## Imagens em funcionamento
 
-![Home](docs/screenshots/01-home.svg)
+![Home](https://raw.githubusercontent.com/crmpereira/BuscaJob/main/docs/screenshots/01-home.svg)
 
-![Filtros](docs/screenshots/02-filtros.svg)
+![Filtros](https://raw.githubusercontent.com/crmpereira/BuscaJob/main/docs/screenshots/02-filtros.svg)
 
-![Abrir Vaga](docs/screenshots/03-abrir-vaga.svg)
+![Abrir Vaga](https://raw.githubusercontent.com/crmpereira/BuscaJob/main/docs/screenshots/03-abrir-vaga.svg)
 
 ## Testes manuais de "Abrir Vaga"
 - Vaga com URL válida (`https://exemplo.com/vaga`): abre em nova aba.

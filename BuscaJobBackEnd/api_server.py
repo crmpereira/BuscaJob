@@ -121,6 +121,7 @@ def ultimo_resultado():
                 'url': v.get('url', ''),
                 'tipo': v.get('tipo') or v.get('tipo_contrato', ''),
                 'nivel': v.get('nivel') or v.get('nivel_experiencia', ''),
+                'modalidade': v.get('modalidade', ''),
             })
         return jsonify({'success': True, 'vagas': normalized, 'total': len(normalized), 'arquivo': latest_file})
     except Exception as e:
@@ -165,7 +166,8 @@ def buscar_vagas():
                 'site': vaga.site_origem,
                 'url': vaga.url,
                 'tipo': getattr(vaga, 'tipo_contrato', ''),
-                'nivel': getattr(vaga, 'nivel_experiencia', '')
+                'nivel': getattr(vaga, 'nivel_experiencia', ''),
+                'modalidade': getattr(vaga, 'modalidade', '')
             }
             vagas_dict.append(vaga_dict)
         
@@ -431,21 +433,22 @@ def relatorio_fixo():
                 }
                 resultados = scraper.buscar_vagas(criterios)
                 total_consultas += 1
-                for v in resultados:
-                    vaga_dict = {
-                        'id': f"vaga_{hash(getattr(v, 'titulo', '') + getattr(v, 'empresa', ''))}",
-                        'titulo': getattr(v, 'titulo', ''),
-                        'empresa': getattr(v, 'empresa', ''),
-                        'localizacao': getattr(v, 'localizacao', cidade),
-                        'salario': getattr(v, 'salario', ''),
-                        'descricao': getattr(v, 'descricao', ''),
-                        'dataPublicacao': getattr(v, 'data_publicacao', ''),
-                        'site': getattr(v, 'site_origem', ''),
-                        'url': getattr(v, 'url', ''),
-                        'tipo': getattr(v, 'tipo_contrato', ''),
-                        'nivel': getattr(v, 'nivel_experiencia', '')
-                    }
-                    all_vagas.append(vaga_dict)
+        for v in resultados:
+            vaga_dict = {
+                'id': f"vaga_{hash(getattr(v, 'titulo', '') + getattr(v, 'empresa', ''))}",
+                'titulo': getattr(v, 'titulo', ''),
+                'empresa': getattr(v, 'empresa', ''),
+                'localizacao': getattr(v, 'localizacao', cidade),
+                'salario': getattr(v, 'salario', ''),
+                'descricao': getattr(v, 'descricao', ''),
+                'dataPublicacao': getattr(v, 'data_publicacao', ''),
+                'site': getattr(v, 'site_origem', ''),
+                'url': getattr(v, 'url', ''),
+                'tipo': getattr(v, 'tipo_contrato', ''),
+                'nivel': getattr(v, 'nivel_experiencia', ''),
+                'modalidade': getattr(v, 'modalidade', '')
+            }
+            all_vagas.append(vaga_dict)
 
         # Deduplicação básica por (titulo, empresa, site, url)
         seen = set()

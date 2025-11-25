@@ -12,6 +12,7 @@ export interface Vaga {
   url?: string
   tipo?: string
   nivel?: string
+  modalidade?: string
 }
 
 export interface BuscarCriterios {
@@ -19,6 +20,7 @@ export interface BuscarCriterios {
   localizacao?: string
   sites?: string[]
   tipos_contratacao?: string[]
+  modalidades?: string[]
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'

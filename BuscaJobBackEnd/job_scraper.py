@@ -47,6 +47,7 @@ class Vaga:
     tipo_contrato: str = ""
     nivel_experiencia: str = ""
     palavras_chave: List[str] = None
+    modalidade: str = ""
     
     def __post_init__(self):
         if self.palavras_chave is None:
@@ -151,7 +152,19 @@ class JobScraper:
         
         # Remove duplicatas baseado no título e empresa
         vagas_unicas = self._remover_duplicatas(todas_vagas)
-        
+
+        # Normaliza URLs de vagas (corrige caminhos relativos e ausência de esquema)
+        for v in vagas_unicas:
+            try:
+                v.url = self._normalize_url(getattr(v, 'url', ''), getattr(v, 'site_origem', ''))
+            except Exception:
+                pass
+
+        # Infere modalidade quando não fornecida
+        for v in vagas_unicas:
+            if not getattr(v, 'modalidade', ''):
+                v.modalidade = self._inferir_modalidade(v.titulo, v.descricao, v.localizacao)
+
         # Aplica filtros adicionais
         vagas_filtradas = self._aplicar_filtros(vagas_unicas, criterios)
         
@@ -172,6 +185,10 @@ class JobScraper:
             
             for i in range(random.randint(3, 8)):
                 empresa = empresas_mock[i % len(empresas_mock)]
+                # Link estável de busca no Indeed (evita IDs aleatórios que expiram)
+                from urllib.parse import quote_plus
+                q = quote_plus(f"{cargo} {empresa}")
+                l = quote_plus(localizacao)
                 vaga = Vaga(
                     titulo=f"{cargo} - {empresa}",
                     empresa=empresa,
@@ -180,7 +197,7 @@ class JobScraper:
                     descricao=self._gerar_descricao(cargo, empresa),
                     data_publicacao=(datetime.now() - timedelta(days=random.randint(0, 7))).strftime('%d/%m/%Y'),
                     site_origem='Indeed',
-                    url=f'https://br.indeed.com/viewjob?jk={random.randint(1000000000000000, 9999999999999999)}&tk={random.randint(100000000000000000000000000000000, 999999999999999999999999999999999)}',
+                    url=f'https://br.indeed.com/jobs?q={q}&l={l}',
                     tipo_contrato='CLT'
                 )
                 vagas.append(vaga)
@@ -263,6 +280,9 @@ class JobScraper:
             
             for i in range(random.randint(3, 8)):
                 empresa = empresas_mock[i % len(empresas_mock)]
+                from urllib.parse import quote_plus
+                q = quote_plus(f"{cargo} {empresa}")
+                l = quote_plus(localizacoes_mock[i % len(localizacoes_mock)])
                 vaga = Vaga(
                     titulo=f"{cargo} - {empresa}",
                     empresa=empresa,
@@ -271,7 +291,7 @@ class JobScraper:
                     descricao=self._gerar_descricao(cargo, empresa),
                     data_publicacao=(datetime.now() - timedelta(days=random.randint(0, 7))).strftime('%d/%m/%Y'),
                     site_origem='Catho',
-                    url=f'https://www.catho.com.br/vagas/{cargo.lower().replace(" ", "-")}-{empresa.lower()}-{random.randint(1000000, 9999999)}/',
+                    url=f'https://www.catho.com.br/vagas/?q={q}&where={l}',
                     tipo_contrato='CLT'
                 )
                 vagas.append(vaga)
@@ -290,6 +310,8 @@ class JobScraper:
             
             # Implementação mock
             for i in range(random.randint(2, 6)):
+                from urllib.parse import quote_plus
+                q = quote_plus(cargo)
                 vaga = Vaga(
                     titulo=f"{cargo} Pleno/Sênior",
                     empresa=f"Empresa {i+1}",
@@ -298,7 +320,7 @@ class JobScraper:
                     descricao=f"Vaga para {cargo} com foco em desenvolvimento de soluções inovadoras.",
                     data_publicacao=(datetime.now() - timedelta(days=random.randint(0, 5))).strftime('%d/%m/%Y'),
                     site_origem='Vagas.com',
-                    url=f'https://www.vagas.com.br/vagas-de-{cargo.lower().replace(" ", "-")}/empresa-{i+1}?id={random.randint(1000000, 9999999)}',
+                    url=f'https://www.vagas.com.br/vagas-de-{cargo.lower().replace(" ", "-")}',
                     nivel_experiencia='Pleno'
                 )
                 vagas.append(vaga)
@@ -317,6 +339,9 @@ class JobScraper:
             
             # LinkedIn tem proteções anti-bot, implementação mock
             for i in range(random.randint(4, 10)):
+                from urllib.parse import quote_plus
+                q = quote_plus(cargo)
+                l = quote_plus("São Paulo, SP")
                 vaga = Vaga(
                     titulo=f"{cargo} - Oportunidade Exclusiva",
                     empresa=f"LinkedIn Company {i+1}",
@@ -325,7 +350,7 @@ class JobScraper:
                     descricao=f"Excelente oportunidade para {cargo} em empresa de tecnologia. Benefícios competitivos.",
                     data_publicacao=(datetime.now() - timedelta(days=random.randint(0, 3))).strftime('%d/%m/%Y'),
                     site_origem='LinkedIn',
-                    url=f'https://www.linkedin.com/jobs/view/{random.randint(1000000000, 9999999999)}/?refId={random.randint(100000, 999999)}',
+                    url=f'https://www.linkedin.com/jobs/search/?keywords={q}&location={l}',
                     tipo_contrato='CLT'
                 )
                 vagas.append(vaga)
@@ -444,6 +469,14 @@ class JobScraper:
                 
                 if not tipo_encontrado:
                     continue
+
+            # Filtro por modalidade (home office, presencial, híbrido)
+            if criterios.get('modalidades'):
+                mods_aceitas = [self._normalize_modalidade(m) for m in criterios['modalidades']]
+                mod_vaga = self._normalize_modalidade(getattr(vaga, 'modalidade', ''))
+                # Quando não é possível inferir, não filtra por modalidade
+                if mod_vaga and mod_vaga not in mods_aceitas:
+                    continue
             
             vagas_filtradas.append(vaga)
         
@@ -465,6 +498,71 @@ class JobScraper:
                 return 0.0
         
         return 0.0
+
+    def _normalize_url(self, url: Optional[str], site: Optional[str]) -> Optional[str]:
+        """Normaliza URLs de vagas, resolvendo caminhos relativos e adicionando esquema quando necessário."""
+        if not url:
+            return None
+        s = str(url).strip()
+        if not s:
+            return None
+
+        site_key = (site or '').strip().lower()
+        base_map = {
+            'indeed': 'https://br.indeed.com',
+            'catho': 'https://www.catho.com.br',
+            'vagas': 'https://www.vagas.com.br',
+            'vagas.com.br': 'https://www.vagas.com.br',
+            'linkedin': 'https://www.linkedin.com',
+            'glassdoor': 'https://www.glassdoor.com.br',
+            'infojobs': 'https://www.infojobs.com.br',
+            'stackoverflow': 'https://stackoverflow.com',
+            'stack overflow jobs': 'https://stackoverflow.com',
+            'github': 'https://github.com',
+            'github jobs': 'https://github.com',
+            'trampos': 'https://trampos.co',
+            'trampos.co': 'https://trampos.co',
+            'rocket': 'https://rocketjobs.com.br',
+            'rocket jobs': 'https://rocketjobs.com.br',
+            'startup': 'https://startupjobs.com',
+            'startup jobs': 'https://startupjobs.com',
+        }
+        base = base_map.get(site_key)
+
+        # Corrige protocolo sem dois-pontos (ex.: "https//")
+        if s.lower().startswith('http//'):
+            s = 'http://' + s[6:]
+        elif s.lower().startswith('https//'):
+            s = 'https://' + s[7:]
+
+        # Se for caminho relativo começando com barra, prefixa base
+        if s.startswith('/') and base:
+            s = f"{base}{s}"
+
+        has_scheme = bool(re.match(r'^[a-zA-Z][a-zA-Z0-9+\.-]*:', s))
+        looks_like_domain = bool(re.match(r'^[a-z0-9\.-]+\.[a-z]{2,}', s, re.IGNORECASE))
+
+        # Caminho relativo sem barra (ex.: "rc/clk?...")
+        if not has_scheme and not looks_like_domain and base:
+            s = f"{base.rstrip('/')}/{s.lstrip('/')}"
+
+        # Adiciona https:// quando iniciar com www.
+        if s.lower().startswith('www.'):
+            s = f"https://{s}"
+
+        # Se ainda não tiver esquema, prefixa https://
+        if not has_scheme:
+            s = f"https://{s.lstrip('/')}"
+
+        # Valida URL
+        try:
+            from urllib.parse import urlparse
+            u = urlparse(s)
+            if not u.scheme or not u.netloc:
+                return None
+            return s
+        except Exception:
+            return None
     
     def salvar_resultados(self, vagas: List[Vaga], arquivo: str = 'vagas_encontradas.json'):
         """Salva resultados em arquivo JSON"""
@@ -484,6 +582,32 @@ class JobScraper:
         except Exception as e:
             logging.error(f"Erro ao salvar resultados: {e}")
 
+    def _normalize_modalidade(self, valor: Optional[str]) -> str:
+        """Normaliza modalidade para: HOME OFFICE | PRESENCIAL | HÍBRIDO."""
+        if not valor:
+            return ""
+        v = valor.strip().lower()
+        if any(x in v for x in ["home office", "home-office", "remoto", "remota"]):
+            return "HOME OFFICE"
+        if any(x in v for x in ["hibrido", "híbrido", "hibrida", "híbrida"]):
+            return "HÍBRIDO"
+        if "presencial" in v:
+            return "PRESENCIAL"
+        return ""
+
+    def _inferir_modalidade(self, titulo: str, descricao: str, localizacao: str) -> str:
+        """Infere modalidade com base em título, descrição e localização."""
+        texto = f"{titulo} {descricao} {localizacao}".lower()
+        if any(x in texto for x in ["home office", "home-office", "remoto", "remota"]):
+            return "Home office"
+        if any(x in texto for x in ["hibrido", "híbrido", "hibrida", "híbrida"]):
+            return "Híbrido"
+        if "presencial" in texto:
+            return "Presencial"
+        if (localizacao or '').strip().lower() == 'remoto':
+            return "Home office"
+        return ""
+
     def _scrape_glassdoor(self, criterios: Dict) -> List[Vaga]:
         """Scraping do Glassdoor (simulado - API limitada)"""
         vagas = []
@@ -500,6 +624,9 @@ class JobScraper:
             ]
             
             # Dados simulados baseados no padrão do Glassdoor
+            from urllib.parse import quote_plus
+            q = quote_plus(cargo)
+            lq = quote_plus(local_pref or '')
             vagas_simuladas = [
                 {
                     'titulo': f'{cargo} Sênior',
@@ -507,7 +634,7 @@ class JobScraper:
                     'localizacao': (local_pref or cidades[random.randint(0, len(cidades)-1)]),
                     'salario': 'R$ 8.000 - R$ 12.000',
                     'descricao': None,
-                    'url': f'https://www.glassdoor.com.br/Vaga/{cargo.lower().replace(" ", "-")}-senior-tech-company-brasil-JV_IC2643_KO0,{len(cargo)+7}_KE{len(cargo)+8},{len(cargo)+25}.htm?jl={random.randint(1000000, 9999999)}'
+                    'url': f'https://www.glassdoor.com.br/Job/jobs.htm?sc.keyword={q}'
                 },
                 {
                     'titulo': f'{cargo} Pleno',
@@ -515,7 +642,7 @@ class JobScraper:
                     'localizacao': (local_pref or cidades[random.randint(0, len(cidades)-1)]),
                     'salario': 'R$ 6.000 - R$ 9.000',
                     'descricao': None,
-                    'url': f'https://www.glassdoor.com.br/Vaga/{cargo.lower().replace(" ", "-")}-pleno-startup-inovadora-JV_IC2643_KO0,{len(cargo)+6}_KE{len(cargo)+7},{len(cargo)+23}.htm?jl={random.randint(1000000, 9999999)}'
+                    'url': f'https://www.glassdoor.com.br/Job/jobs.htm?sc.keyword={q}'
                 }
             ]
             
@@ -554,6 +681,8 @@ class JobScraper:
                 'Fortaleza, CE', 'Recife, PE', 'Goiânia, GO', 'Florianópolis, SC'
             ]
             
+            from urllib.parse import quote_plus
+            q = quote_plus(cargo)
             vagas_simuladas = [
                 {
                     'titulo': f'{cargo} Jr/Pleno',
@@ -561,7 +690,7 @@ class JobScraper:
                     'localizacao': cidades[random.randint(0, len(cidades)-1)],
                     'salario': 'R$ 4.500 - R$ 7.500',
                     'descricao': f'Vaga para {cargo} com crescimento profissional.',
-                    'url': f'https://www.infojobs.com.br/vaga-de-{cargo.lower().replace(" ", "-")}-jr-pleno-em-consultoria-tech.aspx?jobId={random.randint(100000, 999999)}'
+                    'url': f'https://www.infojobs.com.br/empregos.aspx?keyword={q}'
                 },
                 {
                     'titulo': f'{cargo} Sênior',
@@ -569,7 +698,7 @@ class JobScraper:
                     'localizacao': cidades[random.randint(0, len(cidades)-1)],
                     'salario': 'R$ 7.000 - R$ 11.000',
                     'descricao': f'Oportunidade sênior para {cargo}.',
-                    'url': f'https://www.infojobs.com.br/vaga-de-{cargo.lower().replace(" ", "-")}-senior-em-empresa-digital.aspx?jobId={random.randint(100000, 999999)}'
+                    'url': f'https://www.infojobs.com.br/empregos.aspx?keyword={q}'
                 }
             ]
             
@@ -599,6 +728,9 @@ class JobScraper:
         try:
             cargo = criterios.get('cargo', 'Desenvolvedor')
             
+            from urllib.parse import quote_plus
+            q = quote_plus(cargo)
+            lq = quote_plus(criterios.get('localizacao') or '')
             vagas_simuladas = [
                 {
                     'titulo': f'Senior {cargo}',
@@ -606,7 +738,7 @@ class JobScraper:
                     'localizacao': 'Remoto',
                     'salario': 'R$ 10.000 - R$ 15.000',
                     'descricao': f'Remote {cargo} position with cutting-edge technologies.',
-                    'url': f'https://stackoverflow.com/jobs/{random.randint(100000, 999999)}/senior-{cargo.lower().replace(" ", "-")}-tech-startup'
+                    'url': f'https://stackoverflow.com/jobs?q={q}&l={lq}'
                 },
                 {
                     'titulo': f'Lead {cargo}',
@@ -614,7 +746,7 @@ class JobScraper:
                     'localizacao': 'São Paulo/Remoto',
                     'salario': 'R$ 12.000 - R$ 18.000',
                     'descricao': f'Leadership role for experienced {cargo}.',
-                    'url': f'https://stackoverflow.com/jobs/{random.randint(100000, 999999)}/lead-{cargo.lower().replace(" ", "-")}-global-company'
+                    'url': f'https://stackoverflow.com/jobs?q={q}&l={lq}'
                 }
             ]
             
@@ -644,6 +776,8 @@ class JobScraper:
         try:
             cargo = criterios.get('cargo', 'Desenvolvedor')
             
+            from urllib.parse import quote_plus
+            q = quote_plus(cargo)
             vagas_simuladas = [
                 {
                     'titulo': f'{cargo} - Open Source',
@@ -651,7 +785,7 @@ class JobScraper:
                     'localizacao': 'Remoto Global',
                     'salario': 'USD 4.000 - USD 7.000',
                     'descricao': f'{cargo} position focused on open source projects.',
-                    'url': 'https://github.com/jobs/exemplo'
+                    'url': f'https://github.com/search?q={q}&type=repositories'
                 },
                 {
                     'titulo': f'DevOps {cargo}',
@@ -659,7 +793,7 @@ class JobScraper:
                     'localizacao': 'Remoto',
                     'salario': 'R$ 10.000 - R$ 16.000',
                     'descricao': f'DevOps {cargo} role with Kubernetes and Docker.',
-                    'url': 'https://github.com/jobs/exemplo-2'
+                    'url': f'https://github.com/search?q={q}&type=repositories'
                 }
             ]
             
@@ -690,6 +824,9 @@ class JobScraper:
             cargo = criterios.get('cargo', 'Desenvolvedor')
             localizacao = criterios.get('localizacao', 'Brasil')
             
+            from urllib.parse import quote_plus
+            q = quote_plus(cargo)
+            lq = quote_plus(localizacao)
             vagas_simuladas = [
                 {
                     'titulo': f'{cargo} Mobile',
@@ -697,7 +834,7 @@ class JobScraper:
                     'localizacao': localizacao,
                     'salario': 'R$ 6.500 - R$ 9.500',
                     'descricao': f'{cargo} Mobile com React Native e Flutter.',
-                    'url': 'https://trampos.co/vaga-exemplo'
+                    'url': f'https://trampos.co/oportunidades?q={q}&l={lq}'
                 },
                 {
                     'titulo': f'{cargo} Web',
@@ -705,7 +842,7 @@ class JobScraper:
                     'localizacao': localizacao,
                     'salario': 'R$ 5.000 - R$ 8.000',
                     'descricao': f'{cargo} Web com foco em e-commerce.',
-                    'url': 'https://trampos.co/vaga-exemplo-2'
+                    'url': f'https://trampos.co/oportunidades?q={q}&l={lq}'
                 }
             ]
             
@@ -735,6 +872,8 @@ class JobScraper:
         try:
             cargo = criterios.get('cargo', 'Desenvolvedor')
             
+            from urllib.parse import quote_plus
+            q = quote_plus(cargo)
             vagas_simuladas = [
                 {
                     'titulo': f'{cargo} Rocket',
@@ -742,7 +881,7 @@ class JobScraper:
                     'localizacao': 'São Paulo/Remoto',
                     'salario': 'R$ 8.500 - R$ 13.000',
                     'descricao': f'{cargo} position in fast-growing rocket company.',
-                    'url': 'https://rocketjobs.com.br/vaga-exemplo'
+                    'url': f'https://rocketjobs.com.br/vagas?q={q}'
                 },
                 {
                     'titulo': f'Lead {cargo}',
@@ -750,7 +889,7 @@ class JobScraper:
                     'localizacao': 'Remoto',
                     'salario': 'R$ 12.000 - R$ 18.000',
                     'descricao': f'Tech Lead {cargo} role with team management.',
-                    'url': 'https://rocketjobs.com.br/vaga-exemplo-2'
+                    'url': f'https://rocketjobs.com.br/vagas?q={q}'
                 }
             ]
             
@@ -780,6 +919,8 @@ class JobScraper:
         try:
             cargo = criterios.get('cargo', 'Desenvolvedor')
             
+            from urllib.parse import quote_plus
+            q = quote_plus(cargo)
             vagas_simuladas = [
                 {
                     'titulo': f'{cargo} Startup',
@@ -787,7 +928,7 @@ class JobScraper:
                     'localizacao': 'Remoto',
                     'salario': 'R$ 7.000 - R$ 11.000 + Equity',
                     'descricao': f'{cargo} role in early-stage startup with equity.',
-                    'url': 'https://startupjobs.com/vaga-exemplo'
+                    'url': f'https://startupjobs.com/jobs?keywords={q}'
                 },
                 {
                     'titulo': f'Founding {cargo}',
@@ -795,7 +936,7 @@ class JobScraper:
                     'localizacao': 'São Paulo/Remoto',
                     'salario': 'R$ 9.000 - R$ 14.000 + Equity',
                     'descricao': f'Founding {cargo} position with significant equity.',
-                    'url': 'https://startupjobs.com/vaga-exemplo-2'
+                    'url': f'https://startupjobs.com/jobs?keywords={q}'
                 }
             ]
             

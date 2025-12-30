@@ -181,7 +181,7 @@ class JobScraper:
             
             # Implementação mock para demonstração
             empresas_mock = ['TechCorp', 'InnovaSoft', 'DataSolutions', 'CloudTech', 'DevCompany']
-            localizacoes_mock = ['São Paulo, SP', 'Rio de Janeiro, RJ', 'Belo Horizonte, MG', 'Remoto']
+            localizacoes_mock = ['São Paulo, SP', 'Rio de Janeiro, RJ', 'Belo Horizonte, MG', 'Florianópolis, SC', 'Joinville, SC', 'Remoto']
             
             for i in range(random.randint(3, 8)):
                 empresa = empresas_mock[i % len(empresas_mock)]
@@ -276,7 +276,7 @@ class JobScraper:
             
             # Gera vagas mock para demonstração
             empresas_mock = ['TechCorp', 'InnovaSoft', 'DataSolutions', 'CloudTech']
-            localizacoes_mock = ['São Paulo, SP', 'Rio de Janeiro, RJ', 'Remoto']
+            localizacoes_mock = ['São Paulo, SP', 'Rio de Janeiro, RJ', 'Florianópolis, SC', 'Joinville, SC', 'Remoto']
             
             for i in range(random.randint(3, 8)):
                 empresa = empresas_mock[i % len(empresas_mock)]
@@ -992,3 +992,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

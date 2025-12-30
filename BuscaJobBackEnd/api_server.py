@@ -400,6 +400,8 @@ def relatorio_fixo():
             'Analista de Negocios',
             'Analista de Requisitos',
             'Desenvolvedor',
+            'Gerente de TI',
+            'Coordenador de TI',
         ]
         cidades = [
             'Joinville',
@@ -407,6 +409,8 @@ def relatorio_fixo():
             'Curitiba',
             'Porto Alegre',
             'Belo Horizonte',
+            'Florianópolis',
+            'Santa Catarina',
         ]
         # Obtém lista de sites do scraper, com fallback
         try:
@@ -614,3 +618,4 @@ if __name__ == '__main__':
             pass
     
     app.run(debug=True, host='0.0.0.0', port=5000)
+

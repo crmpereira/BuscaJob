@@ -1,36 +1,29 @@
-# BuscaJob – Modo Somente API
+# BuscaJob - Backend
 
-API Flask para coleta e consolidação de vagas de emprego (sem frontend). Inclui endpoints para relatório fixo, busca por critérios, último resultado e health check. Oferece automação via PowerShell.
+Este diretório contém o código fonte do backend da aplicação BuscaJob.
 
-## Quickstart (GitHub)
-- Clonar: `git clone https://github.com/crmpereira/BuscaJob.git`
-- Entrar: `cd BuscaJob`
-- Venv: `python -m venv .venv`
-- Dependências: `.\.venv\Scripts\pip.exe install -r BuscaJobBackEnd\requirements.txt`
-- Rodar servidor: `.\.venv\Scripts\python.exe BuscaJobBackEnd\api_server.py` (opcional)
+## 📋 Sobre
 
-## Endpoints
-- `/` – Status da API e lista de endpoints
-- `/api/health` – Verificação de saúde (`{"status":"ok"}`)
-- `/api/relatorio-fixo` – Gera e salva `relatorio_fixo_YYYYMMDD_HHMMSS.json`
-- `/api/ultimo-resultado` – Retorna conteúdo do `resultados_*.json` mais recente
-- `/api/buscar-vagas` (POST) – Busca vagas por critérios JSON
+O backend é construído em Python utilizando Flask e é responsável por:
+- Realizar o scraping de vagas em diversos sites.
+- Expor uma API REST para o frontend.
+- Gerenciar tarefas agendadas e envio de e-mails.
+- Processar e exportar dados.
 
-## Script PowerShell (sem servidor)
-- Arquivo: `BuscaJobBackEnd\run_relatorio.ps1`
-- Uso: `powershell -ExecutionPolicy Bypass -File .\BuscaJobBackEnd\run_relatorio.ps1`
-- Com email: `powershell -ExecutionPolicy Bypass -File .\BuscaJobBackEnd\run_relatorio.ps1 -EnviarEmail`
-- Observação: usa Flask test client, imprime `Arquivo` e `Total de vagas`.
+## 🚀 Como Executar
 
-## Requisitos e variáveis
-- Python 3.10+
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`, `EMAIL_TO` (opcional)
-- Ativar envio automático: `EMAIL_ENABLED=true`
+Consulte o [README principal](../README.md) na raiz do projeto para instruções detalhadas de instalação e execução.
 
-## Saídas geradas
-- `/api/relatorio-fixo` -> `relatorio_fixo_YYYYMMDD_HHMMSS.json`
-- `/api/buscar-vagas` -> `resultados_YYYYMMDD_HHMMSS.json`
+## 🔧 Desenvolvimento
 
-## Organização do repo
-- Backend em `BuscaJobBackEnd/` (API Flask e scripts). Frontend e CLI removidos.
-- Dependências enxutas em `BuscaJobBackEnd/requirements.txt` (removido `selenium` e `python-dotenv`).
+### Estrutura de Arquivos
+- `api_server.py`: Servidor Flask principal.
+- `job_scraper.py`: Lógica de extração de dados.
+- `run_relatorio.ps1`: Script PowerShell para execução de relatórios via CLI.
+
+### Dependências
+As dependências estão listadas em `requirements.txt`.
+
+```bash
+pip install -r requirements.txt
+```

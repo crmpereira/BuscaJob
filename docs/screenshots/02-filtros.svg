@@ -1,30 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720">
-  <rect width="100%" height="100%" fill="#ffffff"/>
-  <rect x="40" y="40" width="1120" height="60" rx="12" fill="#6366F1"/>
-  <text x="60" y="80" font-family="Segoe UI, Roboto, Arial" font-size="28" fill="#ffffff">BuscaJob — Filtros</text>
+  <rect width="100%" height="100%" fill="#f9fafb"/>
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="1200" height="80" fill="#ffffff" stroke-bottom="#e5e7eb"/>
+  <rect x="40" y="20" width="40" height="40" rx="8" fill="#6366F1"/>
+  <text x="50" y="48" font-family="Segoe UI, Roboto, Arial" font-size="24" fill="#ffffff">💼</text>
+  <text x="95" y="48" font-family="Segoe UI, Roboto, Arial" font-weight="bold" font-size="24" fill="#111827">BuscaJob</text>
+  
+  <!-- Sidebar em Destaque -->
+  <rect x="350" y="100" width="500" height="580" rx="8" fill="#ffffff" stroke="#6366F1" stroke-width="2"/>
+  <text x="370" y="135" font-family="Segoe UI, Roboto, Arial" font-weight="bold" font-size="20" fill="#111827">Filtros</text>
+  
+  <!-- Botões de Ação -->
+  <rect x="370" y="155" width="460" height="45" rx="6" fill="#6366F1"/>
+  <text x="560" y="185" font-family="Segoe UI, Roboto, Arial" font-weight="medium" font-size="18" fill="#ffffff">🔎 Buscar Vagas</text>
+  
+  <rect x="370" y="210" width="460" height="40" rx="6" fill="#ffffff" stroke="#d1d5db"/>
+  <text x="580" y="235" font-family="Segoe UI, Roboto, Arial" font-weight="medium" font-size="16" fill="#374151">🗑️ Resetar</text>
 
-  <!-- Card de filtros -->
-  <rect x="40" y="120" width="1120" height="520" rx="12" fill="#ffffff" stroke="#E5E7EB"/>
+  <!-- Seções de Filtros -->
+  <g transform="translate(370, 280)">
+    <!-- Cargo -->
+    <text x="0" y="0" font-family="Segoe UI, Roboto, Arial" font-weight="600" font-size="16" fill="#111827">Cargo</text>
+    <rect x="0" y="15" width="460" height="120" rx="4" fill="#f3f4f6"/>
+    <text x="15" y="40" font-family="Segoe UI, Roboto, Arial" font-size="15" fill="#374151">☑ Todos</text>
+    <text x="15" y="65" font-family="Segoe UI, Roboto, Arial" font-size="15" fill="#374151">☐ Analista de Sistemas</text>
+    <text x="15" y="90" font-family="Segoe UI, Roboto, Arial" font-size="15" fill="#374151">☐ Analista de Negócios</text>
+    <text x="15" y="115" font-family="Segoe UI, Roboto, Arial" font-size="15" fill="#374151">☐ Analista de Requisitos</text>
+    
+    <!-- Localização -->
+    <text x="0" y="160" font-family="Segoe UI, Roboto, Arial" font-weight="600" font-size="16" fill="#111827">Localização</text>
+    <rect x="0" y="175" width="460" height="100" rx="4" fill="#f3f4f6"/>
+    <text x="15" y="200" font-family="Segoe UI, Roboto, Arial" font-size="15" fill="#374151">☑ Todos</text>
+    <text x="15" y="225" font-family="Segoe UI, Roboto, Arial" font-size="15" fill="#374151">☐ São Paulo</text>
+    <text x="15" y="250" font-family="Segoe UI, Roboto, Arial" font-size="15" fill="#374151">☐ Joinville</text>
+  </g>
 
-  <!-- Grupo Cargo -->
-  <text x="60" y="160" font-family="Segoe UI, Roboto, Arial" font-size="20" fill="#111827">Cargo</text>
-  <rect x="60" y="180" width="1080" height="80" rx="8" fill="#F9FAFB" stroke="#E5E7EB"/>
-  <text x="80" y="210" font-family="Segoe UI, Roboto, Arial" font-size="16" fill="#111827">☑ Todos • ☐ Backend • ☐ Frontend • ☐ QA • ☐ DevOps</text>
-
-  <!-- Grupo Localização -->
-  <text x="60" y="290" font-family="Segoe UI, Roboto, Arial" font-size="20" fill="#111827">Localização</text>
-  <rect x="60" y="310" width="1080" height="80" rx="8" fill="#F9FAFB" stroke="#E5E7EB"/>
-  <text x="80" y="340" font-family="Segoe UI, Roboto, Arial" font-size="16" fill="#111827">☑ Todos • ☐ São Paulo • ☐ Belo Horizonte • ☐ Remoto • ☐ Híbrido</text>
-
-  <!-- Grupo Sites -->
-  <text x="60" y="420" font-family="Segoe UI, Roboto, Arial" font-size="20" fill="#111827">Sites</text>
-  <rect x="60" y="440" width="1080" height="160" rx="8" fill="#F9FAFB" stroke="#E5E7EB"/>
-  <text x="80" y="470" font-family="Segoe UI, Roboto, Arial" font-size="16" fill="#111827">☑ Todos • ☐ linkedin • ☐ indeed • ☐ catho • ☐ infojobs • ☐ vagas • ...</text>
-  <text x="80" y="500" font-family="Segoe UI, Roboto, Arial" font-size="14" fill="#6B7280">Lista com rolagem e tipografia reduzida</text>
-
-  <!-- Botão Buscar -->
-  <rect x="1000" y="600" width="120" height="40" rx="8" fill="#6366F1"/>
-  <text x="1015" y="625" font-family="Segoe UI, Roboto, Arial" font-size="16" fill="#ffffff">🔎 Buscar</text>
-
-  <text x="40" y="690" font-family="Segoe UI, Roboto, Arial" font-size="14" fill="#6B7280">Imagem ilustrativa gerada automaticamente</text>
+  <text x="40" y="700" font-family="Segoe UI, Roboto, Arial" font-size="12" fill="#9ca3af">Mockup gerado automaticamente para documentação</text>
 </svg>

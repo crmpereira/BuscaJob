@@ -5,7 +5,10 @@ Aplicação fullstack para agregação e busca de vagas de emprego, composta por
 ## 🚀 Funcionalidades
 
 - **Busca Unificada**: Pesquise vagas em múltiplos sites simultaneamente.
-- **Filtros Avançados**: Refine por cargo, localização, nível de experiência, modalidade e tipo de contrato.
+- **Filtros Avançados**:
+  - **Cargos**: Inclui novos filtros para Analista de Negócios e Analista de Requisitos.
+  - **Localização**: Suporte expandido para Joinville e Jaraguá do Sul.
+  - Refine também por nível de experiência, modalidade e tipo de contrato.
 - **Visualização Clara**: Lista de resultados limpa com detalhes essenciais.
 - **Favoritos**: Salve vagas de interesse.
 - **Exportação**: Exporte resultados para Excel ou JSON.

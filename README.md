@@ -93,10 +93,10 @@ VITE_API_URL=http://sua-api-url:5000
 ## 📸 Screenshots
 
 ### Home
-![Home](docs/screenshots/01-home.svg)
+![Home](docs/screenshots/01-home.png)
 
 ### Filtros
-![Filtros](docs/screenshots/02-filtros.svg)
+![Filtros](docs/screenshots/02-filtros.png)
 
 ### Detalhes da Vaga
 ![Abrir Vaga](docs/screenshots/03-abrir-vaga.svg)

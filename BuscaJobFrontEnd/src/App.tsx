@@ -45,6 +45,13 @@ export default function App() {
     }
   }
 
+  function onReset() {
+    setVagas([])
+    setInfo(null)
+    setError(null)
+    setPage(1)
+  }
+
   const total = vagas.length
   const start = (page - 1) * pageSize
   const end = start + pageSize
@@ -52,57 +59,79 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
-      <div className="mx-auto max-w-5xl px-4 py-8">
-        <header className="mb-8">
-          <div className="rounded-xl bg-gradient-to-r from-primary to-primary-dark p-6 text-white shadow-sm">
-            <h1 className="text-3xl font-bold">BuscaJob</h1>
-            <p className="mt-1 text-sm opacity-90">Busca simples e lista de vagas via API</p>
-          </div>
-        </header>
-
-        <SearchForm onBuscar={onBuscar} />
-
-        <div className="space-y-2 my-3">
-          {loading && (
-            <div className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-blue-700">
-              Carregando...
+      <header className="bg-white shadow-sm border-b border-gray-100">
+        <div className="mx-auto max-w-7xl px-4 py-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-primary rounded-lg p-2 text-white">
+              <span className="text-2xl">💼</span>
             </div>
-          )}
-          {error && (
-            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-red-700">
-              {error}
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">BuscaJob</h1>
+              <p className="text-sm text-gray-500">Encontre sua próxima oportunidade</p>
             </div>
-          )}
-          {info && (
-            <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-green-700">
-              {info}
-            </div>
-          )}
-        </div>
-
-        <div className="mb-4 flex items-center justify-between">
-          <div className="text-sm text-gray-700">Total: <span className="font-medium">{total}</span> vagas</div>
-          <div className="flex items-center gap-2">
-            <label htmlFor="pageSize" className="text-sm text-gray-700">Itens por página</label>
-            <select
-              id="pageSize"
-              className="rounded-md border border-gray-300 px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              value={pageSize}
-              onChange={e => { setPageSize(Number(e.target.value)); setPage(1) }}
-            >
-              {[5, 10, 20, 50].map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
           </div>
         </div>
+      </header>
 
-        <VagasList vagas={pagedVagas} />
+      <div className="mx-auto max-w-7xl px-4 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* Sidebar - Filtros */}
+          <aside className="w-full lg:w-80 flex-shrink-0">
+            <div className="sticky top-8">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Filtros</h2>
+              <SearchForm onBuscar={onBuscar} onReset={onReset} />
+            </div>
+          </aside>
 
-        <Pagination
-          currentPage={page}
-          totalItems={total}
-          pageSize={pageSize}
-          onPageChange={setPage}
-        />
+          {/* Main Content - Resultados */}
+          <main className="flex-1 min-w-0">
+            <div className="space-y-4">
+              {loading && (
+                <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-blue-700 flex items-center gap-2">
+                  <span className="animate-spin">⏳</span>
+                  Carregando vagas...
+                </div>
+              )}
+              {error && (
+                <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-red-700">
+                  {error}
+                </div>
+              )}
+              {info && (
+                <div className="rounded-xl border border-green-100 bg-green-50 px-4 py-3 text-green-700">
+                  {info}
+                </div>
+              )}
+
+              <div className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+                <div className="text-gray-700">
+                  Encontradas <span className="font-bold text-primary text-lg">{total}</span> vagas
+                </div>
+                <div className="flex items-center gap-3">
+                  <label htmlFor="pageSize" className="text-sm text-gray-600 font-medium">Vagas por página:</label>
+                  <select
+                    id="pageSize"
+                    className="rounded-lg border border-gray-300 bg-gray-50 px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-shadow cursor-pointer hover:bg-white"
+                    value={pageSize}
+                    onChange={e => { setPageSize(Number(e.target.value)); setPage(1) }}
+                  >
+                    {[5, 10, 20, 50].map(n => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <VagasList vagas={pagedVagas} />
+
+              <Pagination
+                currentPage={page}
+                totalItems={total}
+                pageSize={pageSize}
+                onPageChange={setPage}
+              />
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   )

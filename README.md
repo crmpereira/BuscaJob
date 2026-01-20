@@ -9,6 +9,7 @@ Aplicação fullstack para agregação e busca de vagas de emprego, composta por
   - **Cargos**: Inclui novos filtros para Analista de Negócios e Analista de Requisitos.
   - **Localização**: Suporte expandido para Joinville e Jaraguá do Sul.
   - Refine também por nível de experiência, modalidade e tipo de contrato.
+  - **Resetar Filtros**: Botão dedicado para limpar rapidamente todos os critérios e resultados.
 - **Visualização Clara**: Lista de resultados limpa com detalhes essenciais.
 - **Favoritos**: Salve vagas de interesse.
 - **Exportação**: Exporte resultados para Excel ou JSON.

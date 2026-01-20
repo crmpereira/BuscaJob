@@ -6,7 +6,7 @@ const FALLBACK_SITES = [
   'linkedin','indeed','catho','glassdoor','vagas','infojobs','stackoverflow','github','trampos','rocket','startup'
 ]
 
-export function SearchForm({ onBuscar }: { onBuscar: (c: BuscarCriterios) => void }) {
+export function SearchForm({ onBuscar, onReset }: { onBuscar: (c: BuscarCriterios) => void, onReset?: () => void }) {
   const [allSites, setAllSites] = useState<string[]>(FALLBACK_SITES)
   const [selectedSites, setSelectedSites] = useState<string[]>(FALLBACK_SITES)
   const cargoOptions = ['Analista de Sistemas','Analista de Negócios','Analista de Requisitos','Desenvolvedor','Backend','Frontend','QA','DevOps','Product Manager','Gerente de TI','Coordenador de TI']
@@ -15,6 +15,14 @@ export function SearchForm({ onBuscar }: { onBuscar: (c: BuscarCriterios) => voi
   const [selectedLocais, setSelectedLocais] = useState<string[]>([localOptions[0]])
   const modalidadeOptions = ['Home office','Presencial','Híbrido']
   const [selectedModalidades, setSelectedModalidades] = useState<string[]>(modalidadeOptions)
+
+  function handleReset() {
+    setSelectedCargos([cargoOptions[0]])
+    setSelectedLocais([localOptions[0]])
+    setSelectedModalidades(modalidadeOptions)
+    setSelectedSites(allSites)
+    if (onReset) onReset()
+  }
 
   useEffect(() => {
     ;(async () => {
@@ -92,13 +100,31 @@ export function SearchForm({ onBuscar }: { onBuscar: (c: BuscarCriterios) => voi
 
   return (
     <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-      <form onSubmit={submit} className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <div className="md:col-span-2 lg:col-span-3 grid gap-1">
+      <form onSubmit={submit} className="flex flex-col gap-6">
+        <div className="pb-4 border-b border-gray-100 mb-2">
+          <button
+            type="submit"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-3 text-white shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary font-medium transition-colors"
+          >
+            <span>🔎</span>
+            <span>Buscar Vagas</span>
+          </button>
+          
+          <button
+            type="button"
+            onClick={handleReset}
+            className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary font-medium transition-colors"
+          >
+            <span>🗑️</span>
+            <span>Resetar</span>
+          </button>
+        </div>
+        <div className="grid gap-2">
           <div className="flex items-center justify-between gap-2">
-            <label className="text-xs font-medium text-gray-700">Cargo</label>
+            <label className="text-sm font-semibold text-gray-900">Cargo</label>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-            <label className="inline-flex items-center gap-2 text-xs text-gray-700">
+          <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+            <label className="inline-flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50 p-1 rounded cursor-pointer">
               <input
                 type="checkbox"
                 className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
@@ -109,7 +135,7 @@ export function SearchForm({ onBuscar }: { onBuscar: (c: BuscarCriterios) => voi
               <span>Todos</span>
             </label>
             {cargoOptions.map(opt => (
-              <label key={opt} className="inline-flex items-center gap-2 text-xs text-gray-700">
+              <label key={opt} className="inline-flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50 p-1 rounded cursor-pointer">
                 <input
                   type="checkbox"
                   className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
@@ -121,12 +147,12 @@ export function SearchForm({ onBuscar }: { onBuscar: (c: BuscarCriterios) => voi
             ))}
           </div>
         </div>
-        <div className="md:col-span-2 lg:col-span-3 grid gap-1">
+        <div className="grid gap-2">
           <div className="flex items-center justify-between gap-2">
-            <label className="text-xs font-medium text-gray-700">Localização</label>
+            <label className="text-sm font-semibold text-gray-900">Localização</label>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-            <label className="inline-flex items-center gap-2 text-xs text-gray-700">
+          <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+            <label className="inline-flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50 p-1 rounded cursor-pointer">
               <input
                 type="checkbox"
                 className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
@@ -137,7 +163,7 @@ export function SearchForm({ onBuscar }: { onBuscar: (c: BuscarCriterios) => voi
               <span>Todos</span>
             </label>
             {localOptions.map(opt => (
-              <label key={opt} className="inline-flex items-center gap-2 text-xs text-gray-700">
+              <label key={opt} className="inline-flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50 p-1 rounded cursor-pointer">
                 <input
                   type="checkbox"
                   className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
@@ -149,12 +175,12 @@ export function SearchForm({ onBuscar }: { onBuscar: (c: BuscarCriterios) => voi
             ))}
           </div>
         </div>
-        <div className="md:col-span-2 lg:col-span-3 grid gap-1">
+        <div className="grid gap-2">
           <div className="flex items-center justify-between gap-2">
-            <label className="text-xs font-medium text-gray-700">Modalidade</label>
+            <label className="text-sm font-semibold text-gray-900">Modalidade</label>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-            <label className="inline-flex items-center gap-2 text-xs text-gray-700">
+          <div className="flex flex-col gap-2">
+            <label className="inline-flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50 p-1 rounded cursor-pointer">
               <input
                 type="checkbox"
                 className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
@@ -165,7 +191,7 @@ export function SearchForm({ onBuscar }: { onBuscar: (c: BuscarCriterios) => voi
               <span>Todos</span>
             </label>
             {modalidadeOptions.map(opt => (
-              <label key={opt} className="inline-flex items-center gap-2 text-xs text-gray-700">
+              <label key={opt} className="inline-flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50 p-1 rounded cursor-pointer">
                 <input
                   type="checkbox"
                   className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
@@ -177,13 +203,13 @@ export function SearchForm({ onBuscar }: { onBuscar: (c: BuscarCriterios) => voi
             ))}
           </div>
         </div>
-        <div className="md:col-span-2 lg:col-span-3 grid gap-2">
+        <div className="grid gap-2">
           <div className="flex items-center justify-between gap-2">
-            <label className="text-xs font-medium text-gray-700">Sites</label>
+            <label className="text-sm font-semibold text-gray-900">Sites</label>
           </div>
           <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-32 overflow-auto pr-1">
-              <label className="inline-flex items-center gap-2 text-xs text-gray-700 leading-tight">
+            <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+              <label className="inline-flex items-center gap-2 text-sm text-gray-700 leading-tight hover:bg-gray-100 p-1 rounded cursor-pointer">
                 <input
                   type="checkbox"
                   className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
@@ -197,7 +223,7 @@ export function SearchForm({ onBuscar }: { onBuscar: (c: BuscarCriterios) => voi
                 const id = `site-${site}`
                 const checked = selectedSites.includes(site)
                 return (
-                  <label key={site} htmlFor={id} className="inline-flex items-center gap-2 text-xs text-gray-700 leading-tight">
+                  <label key={site} htmlFor={id} className="inline-flex items-center gap-2 text-sm text-gray-700 leading-tight hover:bg-gray-100 p-1 rounded cursor-pointer">
                     <input
                       id={id}
                       type="checkbox"
@@ -211,15 +237,6 @@ export function SearchForm({ onBuscar }: { onBuscar: (c: BuscarCriterios) => voi
               })}
             </div>
           </div>
-        </div>
-        <div className="md:col-span-2 lg:col-span-3 flex justify-end">
-          <button
-            type="submit"
-            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-white shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <span>🔎</span>
-            <span>Buscar</span>
-          </button>
         </div>
       </form>
     </div>

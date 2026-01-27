@@ -61,13 +61,20 @@ export default function App() {
     <div className="min-h-screen bg-gray-50 font-sans">
       <header className="bg-white shadow-sm border-b border-gray-100">
         <div className="mx-auto max-w-7xl px-4 py-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary rounded-lg p-2 text-white">
-              <span className="text-2xl">💼</span>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-primary rounded-lg p-2 text-white">
+                <span className="text-2xl">💼</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">BuscaJob</h1>
+                <p className="text-sm text-gray-500">Encontre sua próxima oportunidade</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">BuscaJob</h1>
-              <p className="text-sm text-gray-500">Encontre sua próxima oportunidade</p>
+            <div className="text-xs sm:text-sm text-gray-600 sm:text-right">
+              <div className="font-semibold text-gray-800">Cesar Pereira</div>
+              <div>(47) 99947-2286</div>
+              <div>cesar.pereiram@gmail.com</div>
             </div>
           </div>
         </div>

@@ -309,6 +309,19 @@ def salvar_vaga():
         logger.error(f"Erro ao salvar vaga: {e}")
         return jsonify({'error': f'Erro interno: {str(e)}'}), 500
 
+@app.route('/api/limpar-resultados', methods=['POST'])
+def limpar_resultados():
+    """Força a limpeza de arquivos de resultados"""
+    try:
+        cleanup_old_result_files()
+        return jsonify({
+            'success': True,
+            'message': 'Limpeza de arquivos realizada com sucesso'
+        })
+    except Exception as e:
+        logger.error(f"Erro ao limpar resultados: {e}")
+        return jsonify({'error': f'Erro interno: {str(e)}'}), 500
+
 @app.route('/api/exportar-vagas', methods=['POST'])
 def exportar_vagas():
     """Exporta vagas para Excel"""
@@ -362,34 +375,37 @@ def exportar_vagas():
 # Limpeza de arquivos antigos (Dia-1 e anteriores)
 
 def cleanup_old_result_files():
-    base_dir = BASE_DIR
-    today_str = datetime.now().strftime('%Y%m%d')
-    patterns = ('resultados_', 'relatorio_fixo_')
-    removed = []
-    for name in os.listdir(base_dir):
-        if any(name.startswith(p) and name.endswith('.json') for p in patterns):
-            full_path = os.path.join(base_dir, name)
-            # Tenta extrair YYYYMMDD do nome (resultados_YYYYMMDD_HHMMSS.json)
+    """Mantém apenas os 2 arquivos de resultados mais recentes"""
+    try:
+        base_dir = BASE_DIR
+        patterns = ('resultados_', 'relatorio_fixo_')
+        
+        # Lista todos os arquivos que correspondem aos padrões
+        files = []
+        for name in os.listdir(base_dir):
+            if any(name.startswith(p) and name.endswith('.json') for p in patterns):
+                full_path = os.path.join(base_dir, name)
+                files.append((full_path, os.path.getmtime(full_path)))
+        
+        # Ordena por data de modificação (mais recentes primeiro)
+        files.sort(key=lambda x: x[1], reverse=True)
+        
+        # Mantém apenas os 2 mais recentes
+        files_to_remove = files[2:]
+        removed = []
+        
+        for file_path, _ in files_to_remove:
             try:
-                parts = name.split('_')
-                if len(parts) >= 2 and parts[1][:8].isdigit():
-                    file_date = parts[1][:8]
-                    if file_date != today_str:
-                        os.remove(full_path)
-                        removed.append(name)
-                        continue
-            except Exception:
-                pass
-            # Fallback por mtime: remove >24h
-            try:
-                mtime = os.path.getmtime(full_path)
-                if time.time() - mtime > 24 * 3600:
-                    os.remove(full_path)
-                    removed.append(name)
-            except Exception:
-                pass
-    if removed:
-        logger.info(f"Arquivos antigos removidos: {removed}")
+                os.remove(file_path)
+                removed.append(os.path.basename(file_path))
+            except Exception as e:
+                logger.warning(f"Erro ao remover arquivo antigo {file_path}: {e}")
+                
+        if removed:
+            logger.info(f"Arquivos antigos removidos (limpeza estrita): {removed}")
+            
+    except Exception as e:
+        logger.error(f"Erro na limpeza de arquivos: {e}")
 
 @app.route('/api/relatorio-fixo', methods=['GET'])
 def relatorio_fixo():

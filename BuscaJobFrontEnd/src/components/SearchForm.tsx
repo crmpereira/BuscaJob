@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { BuscarCriterios } from '../api/client'
-import { getSites } from '../api/client'
+import { getSites, limparResultados } from '../api/client'
 
 const FALLBACK_SITES = [
   'linkedin','indeed','catho','glassdoor','vagas','infojobs','stackoverflow','github','trampos','rocket','startup'
@@ -21,6 +21,10 @@ export function SearchForm({ onBuscar, onReset }: { onBuscar: (c: BuscarCriterio
     setSelectedLocais([localOptions[0]])
     setSelectedModalidades(modalidadeOptions)
     setSelectedSites(allSites)
+    
+    // Dispara limpeza no backend (sem bloquear UI)
+    limparResultados().catch(console.error)
+    
     if (onReset) onReset()
   }
 

@@ -50,3 +50,7 @@ export async function getSites(): Promise<string[]> {
   const sites = Array.isArray(data?.sites) ? data.sites : []
   return sites
 }
+
+export async function limparResultados(): Promise<void> {
+  await axios.post(`${API_URL}/api/limpar-resultados`)
+}

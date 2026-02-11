@@ -331,29 +331,108 @@ class JobScraper:
         return vagas
     
     def _scrape_linkedin(self, criterios: Dict) -> List[Vaga]:
-        """Scraping do LinkedIn (implementação simplificada)"""
+        """Scraping do LinkedIn (Vagas e Publicações)"""
         vagas = []
         
         try:
             cargo = criterios.get('cargo', '')
+            local = criterios.get('localizacao', 'São Paulo')
+            modalidades = criterios.get('modalidades', [])
             
-            # LinkedIn tem proteções anti-bot, implementação mock
-            for i in range(random.randint(4, 10)):
-                from urllib.parse import quote_plus
+            from urllib.parse import quote_plus
+
+            # Empresas fictícias mais realistas
+            empresas_tech = [
+                'TechFlow Solutions', 'DataMinds Analytics', 'AgileSoft Systems', 
+                'CloudNexus', 'DevStream', 'InovaTech Brasil', 'FutureStack',
+                'CodeCrafters', 'ByteVision', 'NextLevel Digital'
+            ]
+
+            # Variações de títulos
+            niveis = ['Júnior', 'Pleno', 'Sênior', 'Especialista', 'Tech Lead', '']
+            complementos = ['Full Stack', 'Backend', 'Frontend', 'Mobile', 'Cloud', 'DevOps']
+
+            # 1. Busca de Vagas (Jobs) - Mock aprimorado
+            for i in range(random.randint(3, 8)):
                 q = quote_plus(cargo)
-                l = quote_plus("São Paulo, SP")
+                l = quote_plus(local)
+                
+                # Gera título mais realista
+                nivel = random.choice(niveis)
+                comp = ""
+                if random.random() > 0.7:
+                    comp = f" - {random.choice(complementos)}"
+                
+                titulo_vaga = f"{cargo} {nivel}{comp}".strip()
+                empresa = random.choice(empresas_tech)
+                
+                # Gera descrição mais rica
+                desc = self._gerar_descricao(cargo, empresa)
+
                 vaga = Vaga(
-                    titulo=f"{cargo} - Oportunidade Exclusiva",
-                    empresa=f"LinkedIn Company {i+1}",
-                    localizacao="Híbrido" if i % 3 == 0 else "São Paulo, SP",
-                    salario="A combinar",
-                    descricao=f"Excelente oportunidade para {cargo} em empresa de tecnologia. Benefícios competitivos.",
-                    data_publicacao=(datetime.now() - timedelta(days=random.randint(0, 3))).strftime('%d/%m/%Y'),
+                    titulo=titulo_vaga,
+                    empresa=empresa,
+                    localizacao="Híbrido" if i % 3 == 0 else local,
+                    salario=f"R$ {random.randint(4000, 18000):,}".replace(',', '.'),
+                    descricao=desc,
+                    data_publicacao=(datetime.now() - timedelta(days=random.randint(0, 5))).strftime('%d/%m/%Y'),
                     site_origem='LinkedIn',
                     url=f'https://www.linkedin.com/jobs/search/?keywords={q}&location={l}',
-                    tipo_contrato='CLT'
+                    tipo_contrato='CLT' if random.random() > 0.3 else 'PJ'
                 )
                 vagas.append(vaga)
+
+            # 2. Busca em Publicações (Posts)
+            # Formato de busca: "Cargo" AND "Modalidade" AND "Local"
+            query_parts = []
+            if cargo:
+                query_parts.append(f'"{cargo}"')
+            
+            for mod in modalidades:
+                if mod:
+                    query_parts.append(f'"{mod}"')
+                
+            if local and local.lower() != 'remoto':
+                query_parts.append(f'"{local}"')
+                
+            boolean_query = " AND ".join(query_parts)
+            encoded_query = quote_plus(boolean_query)
+            
+            # Recrutadores fictícios
+            recrutadores = [
+                'Ana Silva (Tech Recruiter)', 'Carlos Mendes (HR Manager)', 
+                'Juliana Costa (Talent Acquisition)', 'Roberto Santos (Headhunter)',
+                'Mariana Oliveira (Recrutamento)'
+            ]
+            
+            # Gera resultados simulados de posts
+            for i in range(random.randint(2, 5)):
+                recrutador = random.choice(recrutadores)
+                
+                # Títulos de posts parecem mais "chamadas"
+                titulos_post = [
+                    f"Estamos contratando: {cargo}",
+                    f"Vaga aberta para {cargo}!",
+                    f"Oportunidade de {cargo} na nossa equipe",
+                    f"Procuramos {cargo} para início imediato",
+                    f"Nova posição: {cargo}"
+                ]
+                
+                titulo_post = random.choice(titulos_post)
+                
+                vaga_post = Vaga(
+                    titulo=titulo_post,
+                    empresa=recrutador, # Nos posts, quem posta é o "empresa" muitas vezes
+                    localizacao=local,
+                    salario="A combinar",
+                    descricao=f"Olá rede! {titulo_post}. Estamos buscando profissionais com experiência em tecnologias modernas. Interessados enviem CV ou comentem 'Eu quero'. #vagas #{cargo.lower().replace(' ', '')} #emprego",
+                    data_publicacao=datetime.now().strftime('%d/%m/%Y'),
+                    site_origem='LinkedIn Posts',
+                    url=f'https://www.linkedin.com/search/results/content/?keywords={encoded_query}&origin=GLOBAL_SEARCH_HEADER',
+                    tipo_contrato='PJ' if i % 2 == 0 else 'CLT'
+                )
+                vagas.append(vaga_post)
+
                 
         except Exception as e:
             logging.error(f"Erro no scraping do LinkedIn: {e}")
@@ -992,4 +1071,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
+

@@ -96,6 +96,13 @@ export function VagasList({ vagas }: { vagas: Vaga[] }) {
         const key = v.id ?? `${v.titulo}-${v.empresa}-${i}`
         return (
           <div key={key} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-lg hover:border-primary">
+            <div className="mb-2">
+              {v.site && (
+                <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                  {v.site}
+                </span>
+              )}
+            </div>
             <div className="flex items-start justify-between">
               <strong className="text-xl text-gray-900">{v.titulo}</strong>
               <span className="text-sm text-gray-600">{v.empresa}</span>
@@ -110,9 +117,6 @@ export function VagasList({ vagas }: { vagas: Vaga[] }) {
               )}
               {v.salario && (
                 <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-700">💰 {v.salario}</span>
-              )}
-              {v.site && (
-                <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-700">🌐 {v.site}</span>
               )}
               {v.dataPublicacao && (
                 <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-700">🗓️ {v.dataPublicacao}</span>
